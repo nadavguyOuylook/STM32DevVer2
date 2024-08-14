@@ -34,156 +34,167 @@ int32_t P = 0;
 
 tBARODATA *pointerToDataToFilter = {0};
 
+tMS5607Unit onBoardUnit = {0};
+tMS5607Unit smallBoardUnit = {0};
+
 void initMS56XXOutputStruct(tBARODATA *dataToFilter)
 {
 	pointerToDataToFilter = dataToFilter;
 }
 
-void ms5607ChipSelected(void)
+void initMS56XXUnit(tMS5607Unit *unitToInitialize, GPIO_TypeDef* GPIOPortToSet, uint16_t PinToSet, SPI_HandleTypeDef hspiToSet)
 {
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+
+	unitToInitialize->GPIO_Pin = PinToSet;
+	unitToInitialize->GPIOx = GPIOPortToSet;
+	unitToInitialize->hspi = hspiToSet;
 }
 
-void ms5607ChipUnSelected(void)
+void ms5607ChipSelected(tMS5607Unit *ms56Unit)
 {
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(ms56Unit->GPIOx, ms56Unit->GPIO_Pin, GPIO_PIN_RESET);
 }
 
-void MS56XXReset(void)
+void ms5607ChipUnSelected(tMS5607Unit *ms56Unit)
 {
-	ms5607ChipSelected();
-	SPITX[0] = 0x1E;
-	HAL_SPI_Transmit(&hspi1, &SPITX[0], 1, HAL_MAX_DELAY);
-	while (HAL_SPI_GetState(&hspi1) == HAL_SPI_STATE_BUSY);
-	ms5607ChipUnSelected();
+	HAL_GPIO_WritePin(ms56Unit->GPIOx, ms56Unit->GPIO_Pin, GPIO_PIN_SET);
 }
 
-uint16_t MS56XXReadProm(uint8_t address)
+void MS56XXReset(tMS5607Unit *ms56Unit)
 {
-	SPITX[0] = address;
-	ms5607ChipSelected();
-	HAL_SPI_Transmit(&hspi1, &SPITX[0], 1, HAL_MAX_DELAY);
-	while (HAL_SPI_GetState(&hspi1) == HAL_SPI_STATE_BUSY);
-	HAL_SPI_Receive(&hspi1, &SPIRX2Byte[0], 1, HAL_MAX_DELAY);
-	HAL_SPI_Receive(&hspi1, &SPIRX2Byte[1], 1, HAL_MAX_DELAY);
-	ms5607ChipUnSelected();
-	return ((SPIRX2Byte[0]<<8) + SPIRX2Byte[1]);
+	ms5607ChipSelected(ms56Unit);
+	ms56Unit->SPITX[0] = 0x1E;
+	HAL_SPI_Transmit(&ms56Unit->hspi, &ms56Unit->SPITX[0], 1, HAL_MAX_DELAY);
+	while (HAL_SPI_GetState(&ms56Unit->hspi) == HAL_SPI_STATE_BUSY);
+	ms5607ChipUnSelected(ms56Unit);
 }
 
-void MS56XXInit(void)
+uint16_t MS56XXReadProm(tMS5607Unit *ms56Unit, uint8_t address)
 {
-	MS56XXReset();
+	ms56Unit->SPITX[0] = address;
+	ms5607ChipSelected(ms56Unit);
+	HAL_SPI_Transmit(&ms56Unit->hspi, &ms56Unit->SPITX[0], 1, HAL_MAX_DELAY);
+	while (HAL_SPI_GetState(&ms56Unit->hspi) == HAL_SPI_STATE_BUSY);
+	HAL_SPI_Receive(&ms56Unit->hspi, &ms56Unit->SPIRX2Byte[0], 1, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&ms56Unit->hspi, &ms56Unit->SPIRX2Byte[1], 1, HAL_MAX_DELAY);
+	ms5607ChipUnSelected(ms56Unit);
+	return ((ms56Unit->SPIRX2Byte[0]<<8) + ms56Unit->SPIRX2Byte[1]);
+}
+
+void MS56XXInit(tMS5607Unit *ms56Unit)
+{
+	MS56XXReset(ms56Unit);
 	HAL_Delay(50);
-	MS56XXReadProm(0xA0);
-	Coeff1 = MS56XXReadProm(0xA2);
-	Coeff2 = MS56XXReadProm(0xA4);
-	Coeff3 = MS56XXReadProm(0xA6);
-	Coeff4 = MS56XXReadProm(0xA8);
-	Coeff5 = MS56XXReadProm(0xAA);
-	Coeff6 = MS56XXReadProm(0xAC);
-	MSCRC = MS56XXReadProm(0xAE);
+	MS56XXReadProm(ms56Unit, 0xA0);
+	ms56Unit->Coeff1 = MS56XXReadProm(ms56Unit, 0xA2);
+	ms56Unit->Coeff2 = MS56XXReadProm(ms56Unit, 0xA4);
+	ms56Unit->Coeff3 = MS56XXReadProm(ms56Unit, 0xA6);
+	ms56Unit->Coeff4 = MS56XXReadProm(ms56Unit, 0xA8);
+	ms56Unit->Coeff5 = MS56XXReadProm(ms56Unit, 0xAA);
+	ms56Unit->Coeff6 = MS56XXReadProm(ms56Unit, 0xAC);
+	ms56Unit->MSCRC = MS56XXReadProm(ms56Unit, 0xAE);
 
-	MS56XXSendCmd(0x58);
+	MS56XXSendCmd(ms56Unit, 0x58);
 	HAL_Delay(9);
-	RawTemp = MS56XXRead3Bytes(0);
+	ms56Unit->RawTemp = MS56XXRead3Bytes(ms56Unit, 0);
 
-	MS56XXSendCmd(0x48);
+	MS56XXSendCmd(ms56Unit, 0x48);
 	HAL_Delay(9);
-	RawPressure = MS56XXRead3Bytes(0);
-	GetAltitudeAndTemp();
+	ms56Unit->RawPressure = MS56XXRead3Bytes(ms56Unit, 0);
+	GetAltitudeAndTemp(ms56Unit);
 }
 
-void MS56XXSendCmd(uint8_t Cmd)
+void MS56XXSendCmd(tMS5607Unit *ms56Unit, uint8_t Cmd)
 {
-	ms5607ChipSelected();
-	SPITX[0] = Cmd;
-	HAL_SPI_Transmit(&hspi1, &SPITX[0], 1, HAL_MAX_DELAY);
-	while (HAL_SPI_GetState(&hspi1) == HAL_SPI_STATE_BUSY);
-	ms5607ChipUnSelected();
+	ms5607ChipSelected(ms56Unit);
+	ms56Unit->SPITX[0] = Cmd;
+	HAL_SPI_Transmit(&ms56Unit->hspi, &ms56Unit->SPITX[0], 1, HAL_MAX_DELAY);
+	while (HAL_SPI_GetState(&ms56Unit->hspi) == HAL_SPI_STATE_BUSY);
+	ms5607ChipUnSelected(ms56Unit);
 	isCmdSet = true;
 }
 
-uint32_t MS56XXRead3Bytes(uint8_t address)
+uint32_t MS56XXRead3Bytes(tMS5607Unit *ms56Unit, uint8_t address)
 {
-	SPITX[0] = 0x00;
-	ms5607ChipSelected();
-	HAL_SPI_Transmit(&hspi1, &SPITX[0], 1, HAL_MAX_DELAY);
-	while (HAL_SPI_GetState(&hspi1) == HAL_SPI_STATE_BUSY);
-	HAL_SPI_Receive(&hspi1, &SPIRX3Byte[0], 1, HAL_MAX_DELAY);
-	HAL_SPI_Receive(&hspi1, &SPIRX3Byte[1], 1, HAL_MAX_DELAY);
-	HAL_SPI_Receive(&hspi1, &SPIRX3Byte[2], 1, HAL_MAX_DELAY);
-	ms5607ChipUnSelected();
-	isCmdSet = false;
-	return ((SPIRX3Byte[0] << 16) + (SPIRX3Byte[1] << 8 ) + (SPIRX3Byte[0]));
+	ms56Unit->SPITX[0] = 0x00;
+	ms5607ChipSelected(ms56Unit);
+	HAL_SPI_Transmit(&ms56Unit->hspi, &ms56Unit->SPITX[0], 1, HAL_MAX_DELAY);
+	while (HAL_SPI_GetState(&ms56Unit->hspi) == HAL_SPI_STATE_BUSY);
+	HAL_SPI_Receive(&ms56Unit->hspi, &ms56Unit->SPIRX3Byte[0], 1, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&ms56Unit->hspi, &ms56Unit->SPIRX3Byte[1], 1, HAL_MAX_DELAY);
+	HAL_SPI_Receive(&ms56Unit->hspi, &ms56Unit->SPIRX3Byte[2], 1, HAL_MAX_DELAY);
+	ms5607ChipUnSelected(ms56Unit);
+	ms56Unit->isCmdSet = false;
+	return ((ms56Unit->SPIRX3Byte[0] << 16) + (ms56Unit->SPIRX3Byte[1] << 8 ) + (ms56Unit->SPIRX3Byte[0]));
 }
 
-bool GetAltitudeAndTemp(void)
+bool GetAltitudeAndTemp(tMS5607Unit *ms56Unit)
 {
-	dT = (double)RawTemp - (double)Coeff5 * 256.0;
-	TEMP = 2000.0 + dT * (double)Coeff6 / 8388608.0;
-	OFF = (double)Coeff2 * 131072.0 + (double)Coeff4 * (double)dT / 64.0;
-	SNES = (double)Coeff1 * 65536.0 + ((double)Coeff3 * (double)dT) / 128.0;
-	P = (((double)RawPressure * (double)SNES) / 2097152.0 - (double)OFF) / 32768.0;
+	ms56Unit->dT = (double)ms56Unit->RawTemp - (double)ms56Unit->Coeff5 * 256.0;
+	ms56Unit->TEMP = 2000.0 + ms56Unit->dT * (double)ms56Unit->Coeff6 / 8388608.0;
+	ms56Unit->OFF = (double)ms56Unit->Coeff2 * 131072.0 + (double)ms56Unit->Coeff4 * (double)ms56Unit->dT / 64.0;
+	ms56Unit->SNES = (double)ms56Unit->Coeff1 * 65536.0 + ((double)ms56Unit->Coeff3 * (double)ms56Unit->dT) / 128.0;
+	ms56Unit->P = (((double)ms56Unit->RawPressure * (double)ms56Unit->SNES) / 2097152.0 - (double)ms56Unit->OFF) / 32768.0;
 
-	if ( (!isFloatEquals(pointerToDataToFilter->rawData.temperature_out, TEMP, 0.01) )
-			|| (!isFloatEquals(pointerToDataToFilter->rawData.air_pressure_out, P * 100 / 100.0, 0.01)) )
+	if ( (!isFloatEquals(ms56Unit->Data.rawData.temperature_out, ms56Unit->TEMP, 0.01) )
+			|| (!isFloatEquals(ms56Unit->Data.rawData.air_pressure_out, ms56Unit->P * 100 / 100.0, 0.01)) )
 	{
-		pointerToDataToFilter->rawData.temperature_out = TEMP;
-		pointerToDataToFilter->rawData.air_pressure_out = P / 100.0;
+		ms56Unit->Data.rawData.temperature_out = ms56Unit->TEMP;
+		ms56Unit->Data.rawData.air_pressure_out = ms56Unit->P / 100.0;
 		return (true);
 	}
 	return (false);
 }
 
-void MS56XXCyclicRead(void)
+void MS56XXCyclicRead(tMS5607Unit *ms56Unit)
 {
-	if ( (HAL_GetTick() - LastTempMeasurement) > 1000 )
+	if ( (HAL_GetTick() - ms56Unit->LastTempMeasurement) > 1000 )
 	{
-		if (!isCmdSet)
+		if (!ms56Unit->isCmdSet)
 		{
-			MS56XXSendCmd(0x58);
-			isCmdSet = true;
-			pointerToDataToFilter->isNewBaroDataAvailable = false;
-			isPressureLastCmd = false;
-			LastCommandSent = HAL_GetTick();
+			MS56XXSendCmd(ms56Unit, 0x58);
+			ms56Unit->isCmdSet = true;
+			ms56Unit->Data.isNewBaroDataAvailable = false;
+			ms56Unit->isPressureLastCmd = false;
+			ms56Unit->LastCommandSent = HAL_GetTick();
 		}
 	}
 
-	if ((HAL_GetTick() - LastPressureMeasurement) > 20)
+	if ((HAL_GetTick() - ms56Unit->LastPressureMeasurement) > 20)
 	{
-		if (!isCmdSet)
+		if (!ms56Unit->isCmdSet)
 		{
-			MS56XXSendCmd(0x48);
-			isCmdSet = true;
-			pointerToDataToFilter->isNewBaroDataAvailable = false;
-			isPressureLastCmd = true;
-			LastCommandSent = HAL_GetTick();
+			MS56XXSendCmd(ms56Unit, 0x48);
+			ms56Unit->isCmdSet = true;
+			ms56Unit->Data.isNewBaroDataAvailable = false;
+			ms56Unit->isPressureLastCmd = true;
+			ms56Unit->LastCommandSent = HAL_GetTick();
 		}
 	}
 
-	if ( (HAL_GetTick() - LastCommandSent) > 9 )
+	if ( (HAL_GetTick() - ms56Unit->LastCommandSent) > 9 )
 	{
-		if (isCmdSet)
+		if (ms56Unit->isCmdSet)
 		{
-			if (!isPressureLastCmd)
+			if (!ms56Unit->isPressureLastCmd)
 			{
-				RawTemp = MS56XXRead3Bytes(0);
-				LastTempMeasurement = HAL_GetTick();
+				ms56Unit->RawTemp = MS56XXRead3Bytes(ms56Unit, 0);
+				ms56Unit->LastTempMeasurement = HAL_GetTick();
 			}
 			else
 			{
-				RawPressure = MS56XXRead3Bytes(0);
-				LastPressureMeasurement = HAL_GetTick();
+				ms56Unit->RawPressure = MS56XXRead3Bytes(ms56Unit, 0);
+				ms56Unit->LastPressureMeasurement = HAL_GetTick();
 			}
-			isCmdSet = false;
-			pointerToDataToFilter->isNewBaroDataAvailable = GetAltitudeAndTemp();
+			ms56Unit->isCmdSet = false;
+			ms56Unit->Data.isNewBaroDataAvailable = GetAltitudeAndTemp(ms56Unit);
 		}
 	}
 }
 
-void altitudeFromMeasurements(tBARODATA *dataToUse)
+void altitudeFromMeasurements(tMS5607Unit *ms56Unit)
 {
 
-	dataToUse->filteredData.altitude_out = (((float)pow(((float)P_0 / (float)dataToUse->filteredData.air_pressure_out), (float)1.0f / 5.257f) - 1.0f) * ((float)(dataToUse->filteredData.temperature_out / 100.0f) + 273.15f)) / 0.0065f;
+	ms56Unit->Data.filteredData.altitude_out = (((float)pow(((float)P_0 / (float)ms56Unit->Data.filteredData.air_pressure_out), (float)1.0f / 5.257f) - 1.0f) * ((float)(ms56Unit->Data.filteredData.temperature_out / 100.0f) + 273.15f)) / 0.0065f;
 
 }

@@ -49,6 +49,9 @@ extern "C" {
 #include "PushButtonAgent.h"
 #include "ms5607Agent.h"
 #include "GeneralHelper.h"
+
+#include "Bno055Agent.h"
+#include "bno_config.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

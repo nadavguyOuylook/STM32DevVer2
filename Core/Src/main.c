@@ -59,9 +59,12 @@ uint8_t baroReadingArray[100] = {0};
 
 uint32_t baroInitSampleTime = 0;
 
+bno055_t bno;
+error_bno err;
+
 
 float versionID = 1.000;
-float buildID = 1.010;
+float buildID = 1.020;
 
 tBARODATA ms5607Baro = {0};
 /* USER CODE END PV */
@@ -119,19 +122,62 @@ int main(void)
   MX_SPI2_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  initMS56XXOutputStruct(&ms5607Baro);
-  MS56XXInit();
-  ms5607Baro.filteredData.air_pressure_out = ms5607Baro.rawData.air_pressure_out;
+
+//  initMS56XXOutputStruct(&ms5607Baro);
+
+
+  initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
+  MS56XXInit(&onBoardUnit);
+
+  initMS56XXUnit(&smallBoardUnit, GPIOE, GPIO_PIN_5, hspi2);
+    MS56XXInit(&smallBoardUnit);
+//  ms5607Baro.filteredData.air_pressure_out = ms5607Baro.rawData.air_pressure_out;
 
 //  baroInitSampleTime = HAL_GetTick();
   led_init();
   initLEDSequences();
   setLEDSequence(&buttonPressedLEDSequence);
 
-  BSP_QSPI_Init();
 
 
-  fileSystemInit();
+  bno = (bno055_t){
+         .i2c = &hi2c4, .addr = BNO_ADDR, .mode = BNO_MODE_IMU, ._temp_unit = 0,
+         // .ptr = &bno,
+     };
+     HAL_Delay(1000);
+
+     if ((err = bno055_init(&bno)) == BNO_OK) {
+         printf("[+] BNO055 init success\r\n");
+         HAL_Delay(100);
+     } else {
+         printf("[!] BNO055 init failed\r\n");
+         printf("%s\n", bno055_err_str(err));
+         Error_Handler();
+     }
+     HAL_Delay(100);
+     err = bno055_set_unit(&bno, BNO_TEMP_UNIT_C, BNO_GYR_UNIT_DPS,
+                           BNO_ACC_UNITSEL_M_S2, BNO_EUL_UNIT_DEG);
+     if (err != BNO_OK) {
+         printf("[BNO] Failed to set units. Err: %d\r\n", err);
+     } else {
+         printf("[BNO] Unit selection success\r\n");
+     }
+
+     HAL_Delay(1000);
+     s8 temperature = 0;
+     // f32 acc_x = 0.0f, acc_y = 0.0f, acc_z = 0.0f;
+     bno055_vec3_t acc = {0, 0, 0};
+     bno055_vec3_t lia = {0, 0, 0};
+     bno055_vec3_t gyr = {0, 0, 0};
+     bno055_vec3_t mag = {0, 0, 0};
+     bno055_vec3_t grv = {0, 0, 0};
+     bno055_euler_t eul = {0, 0, 0};
+     bno055_vec4_t qua = {0, 0, 0};
+
+//  BSP_QSPI_Init();
+
+
+//  fileSystemInit();
 //  createNewLogFile();
   /* USER CODE END 2 */
 
@@ -139,14 +185,20 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+	  bno.temperature(&bno, &temperature);
+	  bno.acc(&bno, &acc);
+	  bno.linear_acc(&bno, &lia);
+	  bno.gyro(&bno, &gyr);
+	  bno.mag(&bno, &mag);
+	  bno.gravity(&bno, &grv);
+	  bno.euler(&bno, &eul);
+	  bno.quaternion(&bno, &qua);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  MS56XXCyclicRead();
 
-//	  ms5607ChipUnSelected();
 	  updateLEDSequence();
+
   }
   /* USER CODE END 3 */
 }

@@ -55,13 +55,19 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, GPIO_Output_BNO055_Reset__Pin|GPIO_Output_MS5607_CS__SN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIO_Output_BNO055_Reset__GPIO_Port, GPIO_Output_BNO055_Reset__Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIO_Output_MS5607_CS__SN_GPIO_Port, GPIO_Output_MS5607_CS__SN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_Output_SPI1_CS_GPIO_Port, GPIO_Output_SPI1_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_Output_ms5607_CS_Pin|GPIO_Output1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIO_Output_ms5607_CS_GPIO_Port, GPIO_Output_ms5607_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIO_Output1_GPIO_Port, GPIO_Output1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_ChargeEN__Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DP_Signal2_Pin
