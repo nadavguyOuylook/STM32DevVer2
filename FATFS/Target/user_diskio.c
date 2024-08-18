@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -36,18 +36,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "ff_gen_drv.h"
-//#include "FlashQSPIAgent.h"
-#include "stm32746g_qspi.h"
-#include "w25q128fv.h"
+#include "user_diskio_spi.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
-uint32_t SecAdd ;
-uint32_t Size;
-uint32_t DSector;
 
 /* USER CODE END DECL */
 
@@ -87,8 +83,7 @@ DSTATUS USER_initialize (
 )
 {
   /* USER CODE BEGIN INIT */
-    Stat = 0;
-    return Stat;
+	return USER_SPI_initialize(pdrv);
   /* USER CODE END INIT */
 }
 
@@ -102,9 +97,7 @@ DSTATUS USER_status (
 )
 {
   /* USER CODE BEGIN STATUS */
-	Stat = STA_NOINIT;
-	Stat &= ~STA_NOINIT;
-	return Stat;
+	return USER_SPI_status(pdrv);
   /* USER CODE END STATUS */
 }
 
@@ -124,18 +117,7 @@ DRESULT USER_read (
 )
 {
   /* USER CODE BEGIN READ */
-	uint32_t SecAdd = sector * W25Q128FV_SUBSECTOR_SIZE;
-	uint32_t Size = count * W25Q128FV_SUBSECTOR_SIZE;
-
-	if(BSP_QSPI_Read((uint8_t*)buff, (uint32_t)SecAdd, (uint32_t) Size ) ==  HAL_OK)
-	{
-		return RES_OK;
-	}
-	else
-	{
-		return RES_ERROR;
-	}
-	return RES_OK;
+	return USER_SPI_read(pdrv, buff, sector, count);
   /* USER CODE END READ */
 }
 
@@ -157,22 +139,7 @@ DRESULT USER_write (
 {
   /* USER CODE BEGIN WRITE */
   /* USER CODE HERE */
-	DSector = sector;
-	SecAdd = sector * W25Q128FV_SUBSECTOR_SIZE;
-	Size = count * W25Q128FV_SUBSECTOR_SIZE;
-	for(uint16_t i = 0; i< count; i++)
-	{
-		if(BSP_QSPI_Erase_Block(SecAdd + (i * W25Q128FV_SUBSECTOR_SIZE)) != HAL_OK)
-		{
-			return RES_ERROR;
-		}
-	}
-
-	if(BSP_QSPI_Write((uint8_t *)buff, SecAdd, Size) != HAL_OK)
-	{
-		return RES_ERROR;
-	}
-	return RES_OK;
+	return USER_SPI_write(pdrv, buff, sector, count);
   /* USER CODE END WRITE */
 }
 #endif /* _USE_WRITE == 1 */
@@ -192,40 +159,7 @@ DRESULT USER_ioctl (
 )
 {
   /* USER CODE BEGIN IOCTL */
-	DRESULT res = RES_ERROR;
-
-	if (Stat & STA_NOINIT) return RES_NOTRDY;
-
-	switch (cmd)
-	{
-	/* Make sure that no pending write process */
-	case CTRL_SYNC :
-		res = RES_OK;
-		break;
-
-		/* Get number of sectors on the disk (DWORD) */
-	case GET_SECTOR_COUNT :
-		*(DWORD*)buff = W25Q128FV_SUBSECTOR_SIZE; //SDRAM_DEVICE_SIZE / BLOCK_SIZE;
-		res = RES_OK;
-		break;
-
-		/* Get R/W sector size (WORD) */
-	case GET_SECTOR_SIZE :
-		*(WORD*)buff = W25Q128FV_SUBSECTOR_SIZE;
-		res = RES_OK;
-		break;
-
-		/* Get erase block size in unit of sector (DWORD) */
-	case GET_BLOCK_SIZE :
-		*(DWORD*)buff = 1;//SECTOR_SIZE;
-		res = RES_OK;
-		break;
-
-	default:
-		res = RES_PARERR;
-	}
-
-	return res;
+	return USER_SPI_ioctl(pdrv, cmd, buff);
   /* USER CODE END IOCTL */
 }
 #endif /* _USE_IOCTL == 1 */

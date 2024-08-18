@@ -514,8 +514,8 @@ static uint8_t QSPI_ResetMemory()
   */
 static uint8_t QSPI_WriteEnable()
 {
-  QSPI_CommandTypeDef     s_command;
-  QSPI_AutoPollingTypeDef s_config;
+  QSPI_CommandTypeDef     s_command = {0};
+  QSPI_AutoPollingTypeDef s_config = {0};
 
   /* Enable write operations */
   s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;

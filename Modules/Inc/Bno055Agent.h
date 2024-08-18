@@ -464,6 +464,24 @@ typedef struct _bno055_t {
                             const bno055_mag_mode_t mode);
 } bno055_t;
 
+typedef struct sBNODATA
+{
+	s8 temperature;
+	// f32 acc_x = 0.0f, acc_y = 0.0f, acc_z = 0.0f;
+	bno055_vec3_t acc;
+	bno055_vec3_t lia;
+	bno055_vec3_t gyr;
+	bno055_vec3_t mag;
+	bno055_vec3_t grv;
+	bno055_euler_t eul;
+	bno055_vec4_t qua;
+
+}tBNODATA;
+
+extern bno055_t bno;
+extern error_bno err;
+extern tBNODATA smallBoardBNOData;
+
 bno055_t bno055_new();
 
 error_bno bno055_init(bno055_t* imu);
@@ -561,5 +579,9 @@ error_bno bno055_read_regs(bno055_t imu, u8 addr, uint8_t* buf,
 
 error_bno bno055_write_regs(bno055_t imu, uint32_t addr, uint8_t* buf,
                             uint32_t buf_size);
+
+extern void readBNODAta(bno055_t *bnoToRead, tBNODATA *bnoDataBlock, uint16_t dataBitmap);
+
+extern bno055_t bnoUnitInit(bno055_t bnoToInit);
 
 #endif /* INC_BNO055AGENT_H_ */

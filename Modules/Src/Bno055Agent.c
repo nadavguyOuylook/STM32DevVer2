@@ -8,6 +8,8 @@
 #include "stm32f7xx_hal_def.h"
 #include "stm32f7xx_hal_i2c.h"
 
+#include "i2c.h"
+
 /**
  * Initialize the Bosch BNO055 Sensor
  * ---------------------------------------------------------------
@@ -24,7 +26,15 @@
  *  > `bool`: `true` if none of the init steps fail, `false` else
  * ---------------------------------------------------------------
  */
-error_bno bno055_init(bno055_t* imu) {
+
+
+bno055_t bno;
+error_bno err;
+
+tBNODATA smallBoardBNOData = {0};
+
+error_bno bno055_init(bno055_t* imu)
+{
     u8 id = 0;
     error_bno err;
 
@@ -33,25 +43,30 @@ error_bno bno055_init(bno055_t* imu) {
     if (err != BNO_OK) {
         return err;
     }
-    if (id != BNO_DEF_CHIP_ID) {
+    if (id != BNO_DEF_CHIP_ID)
+    {
         return BNO_ERR_WRONG_CHIP_ID;
     }
-    if ((err = bno055_set_opmode(imu, BNO_MODE_CONFIG)) != BNO_OK) {
+    if ((err = bno055_set_opmode(imu, BNO_MODE_CONFIG)) != BNO_OK)
+    {
         return err;
     }
     HAL_Delay(2);
     bno055_reset(imu);
     HAL_Delay(5000);
-    if ((err = bno055_set_pwr_mode(imu, BNO_PWR_NORMAL)) != BNO_OK) {
+    if ((err = bno055_set_pwr_mode(imu, BNO_PWR_NORMAL)) != BNO_OK)
+    {
         return err;
     }
     HAL_Delay(10);
-    if ((err = bno055_set_page(imu, BNO_PAGE_0)) != BNO_OK) {
+    if ((err = bno055_set_page(imu, BNO_PAGE_0)) != BNO_OK)
+    {
         return err;
     }
     HAL_Delay(BNO_CONFIG_TIME_DELAY + 5);
     bno055_on(imu);
-    if ((err = bno055_set_opmode(imu, imu->mode)) != BNO_OK) {
+    if ((err = bno055_set_opmode(imu, imu->mode)) != BNO_OK)
+    {
         return err;
     }
     HAL_Delay(BNO_ANY_TIME_DELAY + 5);
@@ -90,6 +105,7 @@ error_bno bno055_init(bno055_t* imu) {
     imu->acc_config = &bno055_acc_conf;
     imu->gyr_config = &bno055_gyr_conf;
     imu->mag_config = &bno055_mag_conf;
+
     return BNO_OK;
 }
 
@@ -1361,4 +1377,80 @@ char* bno055_err_str(const error_bno err) {
             return "[BNO] Wrong Chip ID.";
     }
     return "[BNO] Ok!";
+}
+
+void readBNODAta(bno055_t *bnoToRead, tBNODATA *bnoDataBlock, uint16_t dataBitmap)
+{
+	if (dataBitmap & 1)
+	{
+	bnoToRead->temperature(bnoToRead, &bnoDataBlock->temperature);
+//	  bno.temperature(&bno, &temperature);
+	}
+	if (dataBitmap & 2)
+	{
+	bnoToRead->acc(bnoToRead, &bnoDataBlock->acc);
+//	  bno.acc(&bno, &acc);
+	}
+	if (dataBitmap & 4)
+	{
+	bnoToRead->linear_acc(bnoToRead, &bnoDataBlock->lia);
+//	  bno.linear_acc(&bno, &lia);
+	}
+	if (dataBitmap & 8)
+	{
+	bnoToRead->gyro(bnoToRead, &bnoDataBlock->gyr);
+//	  bno.gyro(&bno, &gyr);
+	}
+	if (dataBitmap & 16)
+	{
+	bnoToRead->mag(bnoToRead, &bnoDataBlock->mag);
+//	  bno.mag(&bno, &mag);
+	}
+	if (dataBitmap & 32)
+	{
+	bnoToRead->gravity(bnoToRead, &bnoDataBlock->grv);
+//	  bno.gravity(&bno, &grv);
+	}
+	if (dataBitmap & 64)
+	{
+	bnoToRead->euler(bnoToRead, &bnoDataBlock->eul);
+//	  bno.euler(&bno, &eul);
+	}
+	if (dataBitmap & 128)
+	{
+	bnoToRead->quaternion(bnoToRead, &bnoDataBlock->qua);
+//	  bno.quaternion(&bno, &qua);
+	}
+}
+
+bno055_t bnoUnitInit(bno055_t bnoToInit)
+{
+	bnoToInit = (bno055_t){.i2c = &hi2c4, .addr = BNO_ADDR, .mode = BNO_MODE_IMU, ._temp_unit = 0,/* .ptr = &bno,*/};
+	HAL_Delay(1000);
+
+	if ((err = bno055_init(&bnoToInit)) == BNO_OK)
+	{
+		printf("[+] BNO055 init success\r\n");
+		HAL_Delay(100);
+	}
+	else
+	{
+		printf("[!] BNO055 init failed\r\n");
+		printf("%s\n", bno055_err_str(err));
+		Error_Handler();
+	}
+	HAL_Delay(100);
+	err = bno055_set_unit(&bnoToInit, BNO_TEMP_UNIT_C, BNO_GYR_UNIT_DPS,
+			BNO_ACC_UNITSEL_M_S2, BNO_EUL_UNIT_DEG);
+	if (err != BNO_OK)
+	{
+		printf("[BNO] Failed to set units. Err: %d\r\n", err);
+	}
+	else
+	{
+		printf("[BNO] Unit selection success\r\n");
+	}
+
+	HAL_Delay(1000);
+	return (bnoToInit);
 }

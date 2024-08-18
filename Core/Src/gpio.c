@@ -70,11 +70,13 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIO_Output1_GPIO_Port, GPIO_Output1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_ChargeEN__Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DP_Signal2_Pin
-                          |GPIO_Output_QC_DN_Signal1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DP_Signal2_Pin|GPIO_Output_QC_DN_Signal1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_Output__3_GPIO_Port, GPIO_Output__3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIO_Output_ChargeEN__GPIO_Port, GPIO_Output_ChargeEN__Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : PE3 PE6 PE7 PE8
                            PE10 PE12 PE15 */
@@ -152,11 +154,21 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PEPin PEPin */
-  GPIO_InitStruct.Pin = GPIO_Input_BNO055_Int_Pin|GPIO_Input_BNO055_BI_Ind_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = GPIO_EXTI0_BNO_Int_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIO_EXTI0_BNO_Int_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = GPIO_Input_BNO055_BI_Ind_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIO_Input_BNO055_BI_Ind_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 }
 

@@ -44,7 +44,9 @@ extern "C" {
 #include "fonts.h"
 #include "ScreenAgent.h"
 
-#include "stm32746g_qspi.h"
+//#include "stm32746g_qspi.h"
+#include "SDCardAgent.h"
+#include "LogAgent.h"
 #include "LEDAgent.h"
 #include "PushButtonAgent.h"
 #include "ms5607Agent.h"
@@ -52,6 +54,7 @@ extern "C" {
 
 #include "Bno055Agent.h"
 #include "bno_config.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -119,12 +122,21 @@ void Error_Handler(void);
 #define GPIO_Output_QC_DP_Signal2_GPIO_Port GPIOD
 #define GPIO_Output_QC_DN_Signal1_Pin GPIO_PIN_7
 #define GPIO_Output_QC_DN_Signal1_GPIO_Port GPIOD
-#define GPIO_Input_BNO055_Int_Pin GPIO_PIN_0
-#define GPIO_Input_BNO055_Int_GPIO_Port GPIOE
+#define GPIO_EXTI0_BNO_Int_Pin GPIO_PIN_0
+#define GPIO_EXTI0_BNO_Int_GPIO_Port GPIOE
+#define GPIO_EXTI0_BNO_Int_EXTI_IRQn EXTI0_IRQn
 #define GPIO_Input_BNO055_BI_Ind_Pin GPIO_PIN_1
 #define GPIO_Input_BNO055_BI_Ind_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
+
+
+#define SD_CS_Pin GPIO_PIN_5
+#define SD_CS_GPIO_Port GPIOC
+/* USER CODE BEGIN Private defines */
+#define SD_SPI_HANDLE hspi1
+
+
 extern tCURSOR_DATA currentCursorPosition;
 extern tBARODATA ms5607Baro;
 
