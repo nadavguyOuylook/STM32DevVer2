@@ -51,6 +51,7 @@ extern "C" {
 #include "PushButtonAgent.h"
 #include "ms5607Agent.h"
 #include "GeneralHelper.h"
+#include "PowerAgent.h"
 
 #include "Bno055Agent.h"
 #include "bno_config.h"
@@ -86,8 +87,6 @@ void Error_Handler(void);
 #define GPIO_Output_MS5607_CS__SN_GPIO_Port GPIOE
 #define SYS_WKUP4_Tamper_Pin GPIO_PIN_13
 #define SYS_WKUP4_Tamper_GPIO_Port GPIOC
-#define ADC1_IN1_Battery_Pin GPIO_PIN_1
-#define ADC1_IN1_Battery_GPIO_Port GPIOA
 #define GPIO_Output_SPI1_CS_Pin GPIO_PIN_5
 #define GPIO_Output_SPI1_CS_GPIO_Port GPIOC
 #define GPIO_Output_ms5607_CS_Pin GPIO_PIN_0

@@ -54,14 +54,15 @@
 
 /* USER CODE BEGIN PV */
 uint8_t baroArrayCounter = 0;
-
 uint8_t baroReadingArray[100] = {0};
 
 uint32_t baroInitSampleTime = 0;
 
+uint32_t OneHzCycleTimestamp = 0;
+
 
 float versionID = 1.000;
-float buildID = 1.020;
+float buildID = 1.030;
 
 tBARODATA ms5607Baro = {0};
 /* USER CODE END PV */
@@ -121,8 +122,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 //  initMS56XXOutputStruct(&ms5607Baro);
+//  initSDCArd();
 
+  boardPowerSources.isChargingEnabled = false;
 
+//  HAL_ADC_Start_DMA(&hadc1, adcValues, 1);
+  HAL_ADC_Start(&hadc1);
+
+  checkPowerSourcesConnection();
   initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
   MS56XXInit(&onBoardUnit);
 
@@ -136,6 +143,7 @@ int main(void)
 
   bno = bnoUnitInit(bno);
 
+
 //  BSP_QSPI_Init();
 //
 //
@@ -147,14 +155,27 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    s8 temperature = 0;
-//    bno055_temperature(&bno, &temperature);
-	   readBNODAta(&bno, &smallBoardBNOData, 2);
+	   readBNODAta(&bno, &smallBoardBNOData, 66); //BNO
+
+	   MS56XXCyclicRead(&onBoardUnit); //MS5607
+	   GetAltitudeAndTemp(&onBoardUnit);
+
+	   MS56XXCyclicRead(&smallBoardUnit); //MS5607
+	   GetAltitudeAndTemp(&smallBoardUnit);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
 	  updateLEDSequence();
+
+	  if (HAL_GetTick() - OneHzCycleTimestamp >= 1000)
+	  {
+		  OneHzCycleTimestamp = HAL_GetTick();
+//		  HAL_ADC_Start_DMA(&hadc1, adcValues, 1);
+		  readADCValues();
+		  checkPowerSourcesConnection();
+		  chargeProcess();
+	  }
 
   }
   /* USER CODE END 3 */

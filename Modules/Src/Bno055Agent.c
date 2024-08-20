@@ -54,6 +54,7 @@ error_bno bno055_init(bno055_t* imu)
     HAL_Delay(2);
     bno055_reset(imu);
     HAL_Delay(5000);
+
     if ((err = bno055_set_pwr_mode(imu, BNO_PWR_NORMAL)) != BNO_OK)
     {
         return err;
@@ -64,6 +65,23 @@ error_bno bno055_init(bno055_t* imu)
         return err;
     }
     HAL_Delay(BNO_CONFIG_TIME_DELAY + 5);
+
+      if ((err = bno055_set_page(imu, BNO_PAGE_1)) != BNO_OK)
+      {
+          return err;
+      }
+      HAL_Delay(BNO_CONFIG_TIME_DELAY + 5);
+
+      uint8_t buf = 1;
+      bno055_write_regs(*imu, 0x10, &buf, 1);
+      HAL_Delay(BNO_CONFIG_TIME_DELAY + 5);
+      buf = 1;
+      bno055_write_regs(*imu, 0x0f, &buf, 1);
+      HAL_Delay(BNO_CONFIG_TIME_DELAY + 5);
+      buf = 0;
+      bno055_read_regs(*imu, 0x0f, &buf, 1);
+
+
     bno055_on(imu);
     if ((err = bno055_set_opmode(imu, imu->mode)) != BNO_OK)
     {
@@ -1383,43 +1401,43 @@ void readBNODAta(bno055_t *bnoToRead, tBNODATA *bnoDataBlock, uint16_t dataBitma
 {
 	if (dataBitmap & 1)
 	{
-	bnoToRead->temperature(bnoToRead, &bnoDataBlock->temperature);
-//	  bno.temperature(&bno, &temperature);
+		bnoToRead->temperature(bnoToRead, &bnoDataBlock->temperature);
+		//	  bno.temperature(&bno, &temperature);
 	}
 	if (dataBitmap & 2)
 	{
-	bnoToRead->acc(bnoToRead, &bnoDataBlock->acc);
-//	  bno.acc(&bno, &acc);
+		bnoToRead->acc(bnoToRead, &bnoDataBlock->acc);
+		//	  bno.acc(&bno, &acc);
 	}
 	if (dataBitmap & 4)
 	{
-	bnoToRead->linear_acc(bnoToRead, &bnoDataBlock->lia);
-//	  bno.linear_acc(&bno, &lia);
+		bnoToRead->linear_acc(bnoToRead, &bnoDataBlock->lia);
+		//	  bno.linear_acc(&bno, &lia);
 	}
 	if (dataBitmap & 8)
 	{
-	bnoToRead->gyro(bnoToRead, &bnoDataBlock->gyr);
-//	  bno.gyro(&bno, &gyr);
+		bnoToRead->gyro(bnoToRead, &bnoDataBlock->gyr);
+		//	  bno.gyro(&bno, &gyr);
 	}
 	if (dataBitmap & 16)
 	{
-	bnoToRead->mag(bnoToRead, &bnoDataBlock->mag);
-//	  bno.mag(&bno, &mag);
+		bnoToRead->mag(bnoToRead, &bnoDataBlock->mag);
+		//	  bno.mag(&bno, &mag);
 	}
 	if (dataBitmap & 32)
 	{
-	bnoToRead->gravity(bnoToRead, &bnoDataBlock->grv);
-//	  bno.gravity(&bno, &grv);
+		bnoToRead->gravity(bnoToRead, &bnoDataBlock->grv);
+		//	  bno.gravity(&bno, &grv);
 	}
 	if (dataBitmap & 64)
 	{
-	bnoToRead->euler(bnoToRead, &bnoDataBlock->eul);
-//	  bno.euler(&bno, &eul);
+		bnoToRead->euler(bnoToRead, &bnoDataBlock->eul);
+		//	  bno.euler(&bno, &eul);
 	}
 	if (dataBitmap & 128)
 	{
-	bnoToRead->quaternion(bnoToRead, &bnoDataBlock->qua);
-//	  bno.quaternion(&bno, &qua);
+		bnoToRead->quaternion(bnoToRead, &bnoDataBlock->qua);
+		//	  bno.quaternion(&bno, &qua);
 	}
 }
 
