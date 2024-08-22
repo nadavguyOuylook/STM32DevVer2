@@ -36,6 +36,7 @@ extern "C" {
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "MenuHelper.h"
 #include "FrameHelper.h"
@@ -44,8 +45,7 @@ extern "C" {
 #include "fonts.h"
 #include "ScreenAgent.h"
 
-//#include "stm32746g_qspi.h"
-#include "SDCardAgent.h"
+#include "stm32746g_qspi.h"
 #include "LogAgent.h"
 #include "LEDAgent.h"
 #include "PushButtonAgent.h"
@@ -56,6 +56,7 @@ extern "C" {
 #include "Bno055Agent.h"
 #include "bno_config.h"
 
+#include "cmd_interp.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -91,8 +92,10 @@ void Error_Handler(void);
 #define GPIO_Output_SPI1_CS_GPIO_Port GPIOC
 #define GPIO_Output_ms5607_CS_Pin GPIO_PIN_0
 #define GPIO_Output_ms5607_CS_GPIO_Port GPIOB
-#define GPIO_Output1_Pin GPIO_PIN_1
-#define GPIO_Output1_GPIO_Port GPIOB
+#define GPIO_Output_Hold_Pin GPIO_PIN_1
+#define GPIO_Output_Hold_GPIO_Port GPIOB
+#define GPIO_Output_WriteProtect_Pin GPIO_PIN_7
+#define GPIO_Output_WriteProtect_GPIO_Port GPIOE
 #define TIM1_CH1_LED_BLUE_Pin GPIO_PIN_9
 #define TIM1_CH1_LED_BLUE_GPIO_Port GPIOE
 #define TIM1_CH2_LED_GREEN_Pin GPIO_PIN_11
@@ -138,6 +141,7 @@ void Error_Handler(void);
 
 extern tCURSOR_DATA currentCursorPosition;
 extern tBARODATA ms5607Baro;
+extern tDATACHANNEL usbDataChannel;
 
 extern uint8_t baroReadingArray[100];
 

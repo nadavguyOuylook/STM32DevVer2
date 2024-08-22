@@ -32,7 +32,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+//#include "stm32746g_qspi.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,9 +66,11 @@ uint32_t OneHzCycleTimestamp = 0;
 
 
 float versionID = 1.000;
-float buildID = 1.030;
+float buildID = 1.040;
 
 tBARODATA ms5607Baro = {0};
+
+tDATACHANNEL usbDataChannel = {0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -124,10 +130,18 @@ int main(void)
 //  initMS56XXOutputStruct(&ms5607Baro);
 //  initSDCArd();
 
+
+  USBD_Interface_fops_FS.Init();
+    HAL_Delay(2000);
+
+  BSP_QSPI_Init();
+  fileSystemInit();
+  createNewLogFile();
+
+
   boardPowerSources.isChargingEnabled = false;
 
-//  HAL_ADC_Start_DMA(&hadc1, adcValues, 1);
-  HAL_ADC_Start(&hadc1);
+  readADCValues();
 
   checkPowerSourcesConnection();
   initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
@@ -143,7 +157,7 @@ int main(void)
 
   bno = bnoUnitInit(bno);
 
-
+//  initSDCArd();
 //  BSP_QSPI_Init();
 //
 //
@@ -171,10 +185,20 @@ int main(void)
 	  if (HAL_GetTick() - OneHzCycleTimestamp >= 1000)
 	  {
 		  OneHzCycleTimestamp = HAL_GetTick();
-//		  HAL_ADC_Start_DMA(&hadc1, adcValues, 1);
 		  readADCValues();
 		  checkPowerSourcesConnection();
 		  chargeProcess();
+	  }
+
+	  if (usbDataChannel.receivedCR)
+	  {
+		  char localArray[128] = "";
+		  memcpy(&localArray[0], usbDataChannel.channelArray, usbDataChannel.numberOfChars);
+		  parse((char *)localArray);
+		  usbDataChannel.numberOfChars = 0;
+		  usbDataChannel.lastChar = 0;
+		  memset(usbDataChannel.channelArray, 0, sizeof(usbDataChannel.channelArray));
+		  usbDataChannel.receivedCR = false;
 	  }
 
   }

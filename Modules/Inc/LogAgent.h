@@ -17,9 +17,30 @@ typedef enum colorsForDisplay {GREEN, BLUE, WHITE, RED, BLACK, MAGENTA, COLOROVE
 
 extern float free_kb;
 extern float total_kb;
+
+extern uint32_t previousLogIndex;
+extern uint32_t lastFileSizeCheck;
 //extern char terminalBuffer[TERMINALBUFFERSIZE];
 
 extern void logData(bool printToScreen, bool screenOnly, tColorsForDisplay selectedColor);
 extern char *resolvePointerToLogsBuffer(void);
+
+
+
+#define MAX_LOG_SIZE (100000)
+#define MAX_LOG_ID 	 (99999)
+
+extern char logsIndexFile[35];
+extern char currentLogFilename[64];
+extern uint8_t FileReadBuffer[1024];
+
+extern bool createNewLogFile(void);
+
+extern uint32_t getCurrentLogSize(void);
+extern void monitorLogSize(void);
+
+extern void writeLogHeaders(void);
+extern void deleteLogs(void);
+extern void closeLogFile(void);
 
 #endif /* INC_LOGAGENT_H_ */
