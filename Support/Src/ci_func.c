@@ -150,36 +150,39 @@ eCI_RESULT func_importFile(void)
 //	{
 //		return (CI_COMMAND_ERROR);
 //	}
-//	char *res = 0;
-//	//	  uint16_t slen = 0;
-//	bool _endFile = false;
-//	//	  char *fn = get_param_str(0);
-//	FIL fileToRead;
-//	//	  f_close(&fileToRead);
-//	char fullFileName[64] = "";
-//	sprintf(fullFileName, "%s",get_param_str(0));
-//	if (f_open(&fileToRead, fullFileName, FA_READ) == FR_OK)
-//	{
-//		while (!_endFile)
-//		{
-//			char lTerminalBuffer[4096] = {0};
-//			res = f_gets(lTerminalBuffer, 4096, &fileToRead);
-//			if (res != 0x00)
-//			{
-//				logData(lTerminalBuffer, false, true, true);
-//			}
-//			else
-//			{
-//				_endFile = true;
-//				for (int i = 0 ; i < 3 ; i++)
-//				{
-//					logData("RC EOF", false, true, true);
-//					HAL_Delay(10);
-//				}
-//			}
-//		}
-//	}
-//	f_close(&fileToRead);
+	char *res = 0;
+	//	  uint16_t slen = 0;
+	bool _endFile = false;
+	//	  char *fn = get_param_str(0);
+	FIL fileToRead;
+	//	  f_close(&fileToRead);
+	char fullFileName[64] = "";
+	sprintf(fullFileName, "%s",get_param_str(0));
+	if (f_open(&fileToRead, fullFileName, FA_READ) == FR_OK)
+	{
+		while (!_endFile)
+		{
+			char lTerminalBuffer[512] = {0};
+			res = f_gets(lTerminalBuffer, 512, &fileToRead);
+			if (res != 0x00)
+			{
+				sprintf(resolvePointerToLogsBuffer(), "%s", lTerminalBuffer);
+				logData(true, true, WHITE);
+				// logData(lTerminalBuffer, false, true, true);
+			}
+			else
+			{
+				_endFile = true;
+				for (int i = 0 ; i < 3 ; i++)
+				{
+					sprintf(resolvePointerToLogsBuffer(), "End Of File");
+					logData(true, true, WHITE);
+					HAL_Delay(10);
+				}
+			}
+		}
+	}
+	f_close(&fileToRead);
 	return (CI_OK);
 }
 
@@ -198,7 +201,7 @@ eCI_RESULT func_dir(void)
     	}
     	else
     	{
-    		sprintf(resolvePointerToLogsBuffer(),"%s\t %lu",fno1.fname, (long int)fno1.fsize);
+    		sprintf(resolvePointerToLogsBuffer(),"%s\t %lu\r\n",fno1.fname, (long int)fno1.fsize);
     		logData(true, true, WHITE);
     	}
     	f_findnext(&dp1, &fno1);
@@ -234,14 +237,16 @@ typedef struct
 
 functionsList cases [] =
 {
-		{ "ver2"	, func_versionReport },
+		{ "ver2", func_versionReport },
 		{ "dbg"	, func_debug },
 		{ "ee?"	, func_systemConfiguration },
 		{ "rst" , func_reset },
 		{ "help", func_showAvailableCommands },
 		{ "scor", func_screenOrientation },
 		{ "ver", func_version },
+		{ "imp", func_importFile },
 		{ "dir", func_dir },
+		{ "fmt", func_fmt },
 		{ "dtm", func_setDateTime}
 };
 

@@ -21,7 +21,7 @@ typedef struct sLEDSEQUENCE
 }tLEDSEQUENCE;
 
 //extern tLEDSEQUENCE orientationErrorLEDSequence;
-//extern tLEDSEQUENCE storageErrorLEDSequence;
+extern tLEDSEQUENCE storageErrorLEDSequence;
 //extern tLEDSEQUENCE idleAutoLEDSequence;
 //extern tLEDSEQUENCE armedAutoLEDSequence;
 //extern tLEDSEQUENCE triggeredLEDSequence;
@@ -34,12 +34,13 @@ extern tLEDSEQUENCE hardfaultErrorLEDSequence;
 //extern tLEDSEQUENCE pyroErrorLEDSequence;
 extern tLEDSEQUENCE dummyLEDSequence;
 //extern tLEDSEQUENCE capacitorsErrorLEDSequence;
-//extern tLEDSEQUENCE idleManualLEDSequence;
+extern tLEDSEQUENCE idleManualLEDSequence;
 //extern tLEDSEQUENCE armedManualLEDSequence;
 extern tLEDSEQUENCE sensorInitErrorLEDSequence;
 extern tLEDSEQUENCE sensorRunErrorLEDSequence;
 //extern tLEDSEQUENCE remoteControlErrorLEDSequence;
 extern tLEDSEQUENCE powerOffSequence;
+extern tLEDSEQUENCE initLEDSequence;
 
 extern void led_init(void);
 extern void initLEDSequences(void);

@@ -120,6 +120,7 @@ void logData(bool printToScreen, bool screenOnly, tColorsForDisplay selectedColo
 				return;
 			}
 		}
+		f_write(&USERFile, localBuffer, strlen(localBuffer), &BytesWritten);
 		memset(localBuffer, 0, sizeof(localBuffer));
 	}
 	else
@@ -233,7 +234,7 @@ void closeLogFile(void)
 
 void monitorLogSize(void)
 {
-	if (HAL_GetTick() - lastFileSizeCheck > 10000)
+	if (HAL_GetTick() - lastFileSizeCheck >= 10000)
 	{
 		f_sync(&USERFile);
 		if (getCurrentLogSize() > MAX_LOG_SIZE)
@@ -242,6 +243,15 @@ void monitorLogSize(void)
 			createNewLogFile();
 		}
 		lastFileSizeCheck = HAL_GetTick();
+
+		FATFS *getFreeFs;
+		DWORD free_clusters, free_sectors, total_sectors;
+
+		f_getfree("\\", &free_clusters, &getFreeFs);
+		total_sectors = (getFreeFs->n_fatent - 2) * getFreeFs->csize;
+		free_sectors = free_clusters * getFreeFs->csize;
+		free_kb = (float)free_sectors*(float)(W25Q128FV_SUBSECTOR_SIZE)/1048576;
+		total_kb = (float)total_sectors*(float)(W25Q128FV_SUBSECTOR_SIZE)/1048576;
 	}
 }
 
@@ -280,8 +290,9 @@ void deleteLogs(void)
 
 void writeLogHeaders(void)
 {
-//	sprintf(terminalBuffer,"LNK, UL-RSSI1, UL-RSSI2, UL-PSRLQ, UL-SNR, DA-Ant, RFMode, UL-TxPWR, DL-RSSI, DL-PSRLQ, DL_SNR");
-//	logData(terminalBuffer, true, false, false);
+	sprintf(resolvePointerToLogsBuffer(),"timestamp, comment, OnBoardAltitude, OnBoardPressure, SmallBoardAltitude, SmallBoardPressure, AccX, AccY, AccZ");
+	logData( false, false, NOCOLOR);
+	f_sync(&USERFile);
 //	sprintf(terminalBuffer,"SMA, State, TriggerMode, Battery[V], Altitude[m], Acceleration[m/Sec^2]");
 //	logData(terminalBuffer, true, false, false);
 }

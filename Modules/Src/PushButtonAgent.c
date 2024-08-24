@@ -6,6 +6,7 @@
  */
 
 #include "main.h"
+#include "fatfs.h"
 
 bool isPushButtonPressed = false;
 
@@ -21,9 +22,9 @@ GPIO_PinState pushPinState;
 
 void checkButtonPress(void)
 {
-	pushPinState = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+//	pushPinState = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 
-	if ( (pushPinState == GPIO_PIN_RESET) && (!isPushButtonPressed) )
+	if ( (pushPinState == GPIO_PIN_SET) && (!isPushButtonPressed) )
 	{
 		//				setLEDSequence(&buttonPressedLEDSequence);
 		isPushButtonPressed = true;
@@ -33,11 +34,11 @@ void checkButtonPress(void)
 			pushButtonPressCycleStart = HAL_GetTick();
 		}
 	}
-	else if ( (pushPinState == GPIO_PIN_RESET) && (isPushButtonPressed) )
+	else if ( (pushPinState == GPIO_PIN_SET) && (isPushButtonPressed) )
 	{
 
 	}
-	else if ( (pushPinState == GPIO_PIN_SET) && (isPushButtonPressed))
+	else if ( (pushPinState == GPIO_PIN_RESET) && (isPushButtonPressed))
 	{
 		pushButtonPressDurationmSec[pushButtonCycle] = HAL_GetTick() - pushButtonPressStart;
 
@@ -51,7 +52,7 @@ void checkButtonPress(void)
 		}
 		pushButtonCycle++;
 	}
-	else if ((pushPinState == GPIO_PIN_SET) && (!isPushButtonPressed) )
+	else if ((pushPinState == GPIO_PIN_RESET) && (!isPushButtonPressed) )
 	{
 		//TODO: Consider how to handle pushBUttonCycle == 5
 		if (HAL_GetTick() - pushButtonPressCycleStart > 5000)
@@ -77,6 +78,21 @@ bool checkForButtonPattern(void)
 	{
 //	    isSetToPowerOff = true;
 //	    setPowerOffCycleStart = HAL_GetTick();
+		if (unitState == IDLE)
+		{
+			unitState = OPERATIONAL;
+			isRecordingActivated = true;
+		}
+		else if (unitState == OPERATIONAL)
+		{
+			unitState = IDLE;
+			isRecordingActivated = false;
+			f_sync(&USERFile);
+		}
+		else
+		{
+			isRecordingActivated = false;
+		}
 		//Do this
 		return (true);
 	}

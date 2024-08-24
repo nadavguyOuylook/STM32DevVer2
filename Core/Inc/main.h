@@ -86,8 +86,6 @@ void Error_Handler(void);
 #define GPIO_Output_BNO055_Reset__GPIO_Port GPIOE
 #define GPIO_Output_MS5607_CS__SN_Pin GPIO_PIN_5
 #define GPIO_Output_MS5607_CS__SN_GPIO_Port GPIOE
-#define SYS_WKUP4_Tamper_Pin GPIO_PIN_13
-#define SYS_WKUP4_Tamper_GPIO_Port GPIOC
 #define GPIO_Output_SPI1_CS_Pin GPIO_PIN_5
 #define GPIO_Output_SPI1_CS_GPIO_Port GPIOC
 #define GPIO_Output_ms5607_CS_Pin GPIO_PIN_0
@@ -132,21 +130,25 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
+typedef enum sState {INIT, IDLE, OPERATIONAL} tState;
 
 #define SD_CS_Pin GPIO_PIN_5
 #define SD_CS_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 #define SD_SPI_HANDLE hspi1
 
-
+extern bool isRecordingActivated;
 extern tCURSOR_DATA currentCursorPosition;
 extern tBARODATA ms5607Baro;
 extern tDATACHANNEL usbDataChannel;
+extern tState unitState;
 
 extern uint8_t baroReadingArray[100];
 
 extern float versionID;
 extern float buildID;
+
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -9,7 +9,7 @@
 #include "tim.h"
 
 //tLEDSEQUENCE orientationErrorLEDSequence = {0};
-//tLEDSEQUENCE storageErrorLEDSequence = {0};
+tLEDSEQUENCE storageErrorLEDSequence = {0};
 //tLEDSEQUENCE idleAutoLEDSequence = {0};
 //tLEDSEQUENCE armedAutoLEDSequence = {0};
 //tLEDSEQUENCE triggeredLEDSequence = {0};
@@ -22,12 +22,13 @@ tLEDSEQUENCE hardfaultErrorLEDSequence = {0};
 //tLEDSEQUENCE pyroErrorLEDSequence = {0};
 tLEDSEQUENCE dummyLEDSequence = {0};
 //tLEDSEQUENCE capacitorsErrorLEDSequence = {0};
-//tLEDSEQUENCE idleManualLEDSequence = {0};
-//tLEDSEQUENCE armedManualLEDSequence = {0};
+tLEDSEQUENCE idleManualLEDSequence = {0};
+tLEDSEQUENCE armedManualLEDSequence = {0};
 tLEDSEQUENCE sensorInitErrorLEDSequence = {0};
 tLEDSEQUENCE sensorRunErrorLEDSequence = {0};
 //tLEDSEQUENCE remoteControlErrorLEDSequence = {0};
 tLEDSEQUENCE powerOffSequence = {0};
+tLEDSEQUENCE initLEDSequence = {0};
 
 tLEDSEQUENCE *activeSequence;
 tLEDSEQUENCE *previousSequence;
@@ -74,25 +75,25 @@ void initLEDSequences(void)
 //	idleAutoLEDSequence.sequenceColors[1] = 4; //Blue
 //	idleAutoLEDSequence.sequenceLength = 2;
 
-//	storageErrorLEDSequence.ID = 3;
-//	storageErrorLEDSequence.phase = 0;
-//	storageErrorLEDSequence.sequenceRepeats = 0;
-//	storageErrorLEDSequence.sequenceStart = 0;
-//	storageErrorLEDSequence.sequenceTimings[0] = 200;
-//	storageErrorLEDSequence.sequenceTimings[1] = 200;
-//	storageErrorLEDSequence.sequenceTimings[2] = 200;
-//	storageErrorLEDSequence.sequenceTimings[3] = 200;
-//	storageErrorLEDSequence.sequenceTimings[4] = 200;
-//	storageErrorLEDSequence.sequenceTimings[5] = 200;
-//	storageErrorLEDSequence.sequenceTimings[6] = 800;
-//	storageErrorLEDSequence.sequenceColors[0] = 0; //Black
-//	storageErrorLEDSequence.sequenceColors[1] = 3; //Yellow
-//	storageErrorLEDSequence.sequenceColors[2] = 0;
-//	storageErrorLEDSequence.sequenceColors[3] = 3;
-//	storageErrorLEDSequence.sequenceColors[4] = 0;
-//	storageErrorLEDSequence.sequenceColors[5] = 3;
-//	storageErrorLEDSequence.sequenceColors[6] = 0;
-//	storageErrorLEDSequence.sequenceLength = 7;
+	storageErrorLEDSequence.ID = 3;
+	storageErrorLEDSequence.phase = 0;
+	storageErrorLEDSequence.sequenceRepeats = 0;
+	storageErrorLEDSequence.sequenceStart = 0;
+	storageErrorLEDSequence.sequenceTimings[0] = 200;
+	storageErrorLEDSequence.sequenceTimings[1] = 200;
+	storageErrorLEDSequence.sequenceTimings[2] = 200;
+	storageErrorLEDSequence.sequenceTimings[3] = 200;
+	storageErrorLEDSequence.sequenceTimings[4] = 200;
+	storageErrorLEDSequence.sequenceTimings[5] = 200;
+	storageErrorLEDSequence.sequenceTimings[6] = 800;
+	storageErrorLEDSequence.sequenceColors[0] = 0; //Black
+	storageErrorLEDSequence.sequenceColors[1] = 3; //Yellow
+	storageErrorLEDSequence.sequenceColors[2] = 0;
+	storageErrorLEDSequence.sequenceColors[3] = 3;
+	storageErrorLEDSequence.sequenceColors[4] = 0;
+	storageErrorLEDSequence.sequenceColors[5] = 3;
+	storageErrorLEDSequence.sequenceColors[6] = 0;
+	storageErrorLEDSequence.sequenceLength = 7;
 
 //	armedAutoLEDSequence.ID = 4;
 //	armedAutoLEDSequence.phase = 0;
@@ -238,37 +239,37 @@ void initLEDSequences(void)
 //	capacitorsErrorLEDSequence.sequenceColors[6] = 0;
 //	capacitorsErrorLEDSequence.sequenceLength = 7;
 
-//	idleManualLEDSequence.ID = 15;
-//	idleManualLEDSequence.phase = 0;
-//	idleManualLEDSequence.sequenceRepeats = 0;
-//	idleManualLEDSequence.sequenceStart = 0;
-//	idleManualLEDSequence.sequenceTimings[0] = 200;
-//	idleManualLEDSequence.sequenceTimings[1] = 200;
-//	idleManualLEDSequence.sequenceTimings[2] = 200;
-//	idleManualLEDSequence.sequenceTimings[3] = 200;
-//	idleManualLEDSequence.sequenceTimings[4] = 1200;
-//	idleManualLEDSequence.sequenceColors[0] = 0; //Black
-//	idleManualLEDSequence.sequenceColors[1] = 4; //Blue
-//	idleManualLEDSequence.sequenceColors[2] = 0;
-//	idleManualLEDSequence.sequenceColors[3] = 4;
-//	idleManualLEDSequence.sequenceColors[4] = 0;
-//	idleManualLEDSequence.sequenceLength = 5;
+	idleManualLEDSequence.ID = 15;
+	idleManualLEDSequence.phase = 0;
+	idleManualLEDSequence.sequenceRepeats = 0;
+	idleManualLEDSequence.sequenceStart = 0;
+	idleManualLEDSequence.sequenceTimings[0] = 200;
+	idleManualLEDSequence.sequenceTimings[1] = 200;
+	idleManualLEDSequence.sequenceTimings[2] = 200;
+	idleManualLEDSequence.sequenceTimings[3] = 200;
+	idleManualLEDSequence.sequenceTimings[4] = 1200;
+	idleManualLEDSequence.sequenceColors[0] = 0; //Black
+	idleManualLEDSequence.sequenceColors[1] = 4; //Blue
+	idleManualLEDSequence.sequenceColors[2] = 0;
+	idleManualLEDSequence.sequenceColors[3] = 4;
+	idleManualLEDSequence.sequenceColors[4] = 0;
+	idleManualLEDSequence.sequenceLength = 5;
 
-//	armedManualLEDSequence.ID = 16;
-//	armedManualLEDSequence.phase = 0;
-//	armedManualLEDSequence.sequenceRepeats = 0;
-//	armedManualLEDSequence.sequenceStart = 0;
-//	armedManualLEDSequence.sequenceTimings[0] = 200;
-//	armedManualLEDSequence.sequenceTimings[1] = 200;
-//	armedManualLEDSequence.sequenceTimings[2] = 200;
-//	armedManualLEDSequence.sequenceTimings[3] = 200;
-//	armedManualLEDSequence.sequenceTimings[4] = 1200;
-//	armedManualLEDSequence.sequenceColors[0] = 0; //Black
-//	armedManualLEDSequence.sequenceColors[1] = 8; //Green
-//	armedManualLEDSequence.sequenceColors[2] = 0;
-//	armedManualLEDSequence.sequenceColors[3] = 8;
-//	armedManualLEDSequence.sequenceColors[4] = 0;
-//	armedManualLEDSequence.sequenceLength = 5;
+	armedManualLEDSequence.ID = 16;
+	armedManualLEDSequence.phase = 0;
+	armedManualLEDSequence.sequenceRepeats = 0;
+	armedManualLEDSequence.sequenceStart = 0;
+	armedManualLEDSequence.sequenceTimings[0] = 200;
+	armedManualLEDSequence.sequenceTimings[1] = 200;
+	armedManualLEDSequence.sequenceTimings[2] = 200;
+	armedManualLEDSequence.sequenceTimings[3] = 200;
+	armedManualLEDSequence.sequenceTimings[4] = 1200;
+	armedManualLEDSequence.sequenceColors[0] = 0; //Black
+	armedManualLEDSequence.sequenceColors[1] = 8; //Green
+	armedManualLEDSequence.sequenceColors[2] = 0;
+	armedManualLEDSequence.sequenceColors[3] = 8;
+	armedManualLEDSequence.sequenceColors[4] = 0;
+	armedManualLEDSequence.sequenceLength = 5;
 
 	sensorInitErrorLEDSequence.ID = 17;
 	sensorInitErrorLEDSequence.phase = 0;
@@ -333,6 +334,22 @@ void initLEDSequences(void)
 	powerOffSequence.sequenceColors[3] = 0;
 	powerOffSequence.sequenceColors[4] = 0;
 	powerOffSequence.sequenceLength = 2;
+
+	initLEDSequence.ID = 21;
+	initLEDSequence.phase = 0;
+	initLEDSequence.sequenceRepeats = 0;
+	initLEDSequence.sequenceStart = 0;
+	initLEDSequence.sequenceTimings[0] = 200;
+	initLEDSequence.sequenceTimings[1] = 200;
+	initLEDSequence.sequenceTimings[2] = 200;
+	initLEDSequence.sequenceTimings[3] = 200;
+	initLEDSequence.sequenceTimings[4] = 1200;
+	initLEDSequence.sequenceColors[0] = 0; //Black
+	initLEDSequence.sequenceColors[1] = 11; //Teal
+	initLEDSequence.sequenceColors[2] = 0;
+	initLEDSequence.sequenceColors[3] = 8;
+	initLEDSequence.sequenceColors[4] = 0;
+	initLEDSequence.sequenceLength = 5;
 
 }
 
@@ -431,18 +448,26 @@ void setLEDSequence(tLEDSEQUENCE *sequenceToSet)
 	}
 	else
 	{
-	    if (pushPinState == GPIO_PIN_RESET)
+	    if (pushPinState == GPIO_PIN_SET)
 	    {
 	        activeSequence = &buttonPressedLEDSequence;
 	    }
-//	    else if (isSetToPowerOff)
-//	    {
-//	        activeSequence = &powerOffSequence;
-//	    }
-		else
-		{
-			activeSequence = sequenceToSet;
-		}
+	    else if (unitState == IDLE)
+	    {
+	        activeSequence = &idleManualLEDSequence;
+	    }
+	    else if (unitState == OPERATIONAL)
+	    {
+	    	activeSequence = &armedManualLEDSequence;
+	    }
+	    if (sequenceToSet->ID == dummyLEDSequence.ID)
+	    {
+	    	return;
+	    }
+	    else
+	    {
+	    	activeSequence = sequenceToSet;
+	    }
 		previousSequence = activeSequence;
 		activeSequence->phase = 0;
 		activeSequenceCycles = 0;

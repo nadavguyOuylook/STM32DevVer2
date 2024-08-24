@@ -92,7 +92,7 @@ extern void MS56XXSendCmd(tMS5607Unit *ms56Unit, uint8_t Cmd);
 extern uint32_t MS56XXRead3Bytes(tMS5607Unit *ms56Unit, uint8_t address);
 extern void MS56XXCyclicRead(tMS5607Unit *ms56Unit);
 bool GetAltitudeAndTemp(tMS5607Unit *ms56Unit);
-extern void altitudeFromMeasurements(tMS5607Unit *ms56Unit);
+extern float altitudeFromMeasurements(tMS5607Unit *ms56Unit);
 extern void ms5607ChipUnSelected(tMS5607Unit *ms56Unit);
 extern void initMS56XXUnit(tMS5607Unit *unitToInitialize, GPIO_TypeDef* GPIOPortToSet, uint16_t PinToSet, SPI_HandleTypeDef hspiToSet);
 

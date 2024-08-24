@@ -57,16 +57,22 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+bool isRecordingActivated = false;
+
 uint8_t baroArrayCounter = 0;
 uint8_t baroReadingArray[100] = {0};
 
 uint32_t baroInitSampleTime = 0;
 
 uint32_t OneHzCycleTimestamp = 0;
+uint32_t TenthHzCycleTimestamp = 0;
 
+uint32_t lastLogWrittenTimestamp = 0;
 
 float versionID = 1.000;
-float buildID = 1.040;
+float buildID = 1.050;
+
+tState unitState = INIT;
 
 tBARODATA ms5607Baro = {0};
 
@@ -130,9 +136,12 @@ int main(void)
 //  initMS56XXOutputStruct(&ms5607Baro);
 //  initSDCArd();
 
+  led_init();
+  initLEDSequences();
+  setLEDSequence(&initLEDSequence);
 
   USBD_Interface_fops_FS.Init();
-    HAL_Delay(2000);
+  HAL_Delay(2000);
 
   BSP_QSPI_Init();
   fileSystemInit();
@@ -151,18 +160,10 @@ int main(void)
   MS56XXInit(&smallBoardUnit);
 
   baroInitSampleTime = HAL_GetTick();
-  led_init();
-  initLEDSequences();
-  setLEDSequence(&buttonPressedLEDSequence);
 
   bno = bnoUnitInit(bno);
-
-//  initSDCArd();
-//  BSP_QSPI_Init();
-//
-//
-//  fileSystemInit();
-//  createNewLogFile();
+  unitState = IDLE;
+  setLEDSequence(&idleManualLEDSequence);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -172,15 +173,34 @@ int main(void)
 	   readBNODAta(&bno, &smallBoardBNOData, 66); //BNO
 
 	   MS56XXCyclicRead(&onBoardUnit); //MS5607
-	   GetAltitudeAndTemp(&onBoardUnit);
+//	   GetAltitudeAndTemp(&onBoardUnit);
 
 	   MS56XXCyclicRead(&smallBoardUnit); //MS5607
-	   GetAltitudeAndTemp(&smallBoardUnit);
+//	   GetAltitudeAndTemp(&smallBoardUnit);
+	   if (HAL_GetTick() - lastLogWrittenTimestamp >= 20)
+	   {
+		   lastLogWrittenTimestamp = HAL_GetTick();
+		   if ( ( (onBoardUnit.Data.isNewBaroDataAvailable) || (smallBoardUnit.Data.isNewBaroDataAvailable) ) && (isRecordingActivated) )
+		   {
+			   sprintf(resolvePointerToLogsBuffer(),"%s %s, "
+					   "%-6.3f, %-6.3f, "
+					   "%-6.3f, %-6.3f, "
+					   "%-6.3f, %-6.3f, %-6.3f\r\n",
+					   CT(), (char *)"",
+					   onBoardUnit.Data.rawData.altitude_out, onBoardUnit.Data.rawData.air_pressure_out,
+					   smallBoardUnit.Data.rawData.altitude_out, smallBoardUnit.Data.rawData.air_pressure_out,
+					   smallBoardBNOData.acc.x, smallBoardBNOData.acc.y, smallBoardBNOData.acc.z);
+			   logData( false, false, NOCOLOR);
+		   }
+	   }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-	  updateLEDSequence();
+	   checkButtonPress();
+
+	   setLEDSequence(&dummyLEDSequence);
+	   updateLEDSequence();
 
 	  if (HAL_GetTick() - OneHzCycleTimestamp >= 1000)
 	  {
@@ -188,6 +208,19 @@ int main(void)
 		  readADCValues();
 		  checkPowerSourcesConnection();
 		  chargeProcess();
+	  }
+
+	  if (HAL_GetTick() - TenthHzCycleTimestamp >= 10 * 1000)
+	  {
+//		  TenthHzCycleTimestamp = HAL_GetTick();
+//		  f_sync(&USERFile);
+		  if (unitState == IDLE)
+		  {
+			if (free_kb <= 5)
+			{
+				setLEDSequence(&storageErrorLEDSequence);
+			}
+		  }
 	  }
 
 	  if (usbDataChannel.receivedCR)
@@ -200,7 +233,7 @@ int main(void)
 		  memset(usbDataChannel.channelArray, 0, sizeof(usbDataChannel.channelArray));
 		  usbDataChannel.receivedCR = false;
 	  }
-
+	  monitorLogSize();
   }
   /* USER CODE END 3 */
 }

@@ -102,6 +102,9 @@ void MS56XXInit(tMS5607Unit *ms56Unit)
 	HAL_Delay(9);
 	ms56Unit->RawPressure = MS56XXRead3Bytes(ms56Unit, 0);
 	GetAltitudeAndTemp(ms56Unit);
+	ms56Unit->Data.filteredData.air_pressure_out = ms56Unit->Data.rawData.air_pressure_out;
+	ms56Unit->Data.filteredData.temperature_out = ms56Unit->Data.rawData.temperature_out;
+	ms56Unit->Data.start_height = altitudeFromMeasurements(ms56Unit);
 }
 
 void MS56XXSendCmd(tMS5607Unit *ms56Unit, uint8_t Cmd)
@@ -141,6 +144,9 @@ bool GetAltitudeAndTemp(tMS5607Unit *ms56Unit)
 	{
 		ms56Unit->Data.rawData.temperature_out = ms56Unit->TEMP;
 		ms56Unit->Data.rawData.air_pressure_out = ms56Unit->P / 100.0;
+		ms56Unit->Data.filteredData.temperature_out = ms56Unit->TEMP;
+		ms56Unit->Data.filteredData.air_pressure_out = ms56Unit->P / 100.0;
+		ms56Unit->Data.rawData.altitude_out = altitudeFromMeasurements(ms56Unit) - ms56Unit->Data.start_height;
 		return (true);
 	}
 	return (false);
@@ -192,9 +198,9 @@ void MS56XXCyclicRead(tMS5607Unit *ms56Unit)
 	}
 }
 
-void altitudeFromMeasurements(tMS5607Unit *ms56Unit)
+float altitudeFromMeasurements(tMS5607Unit *ms56Unit)
 {
 
 	ms56Unit->Data.filteredData.altitude_out = (((float)pow(((float)P_0 / (float)ms56Unit->Data.filteredData.air_pressure_out), (float)1.0f / 5.257f) - 1.0f) * ((float)(ms56Unit->Data.filteredData.temperature_out / 100.0f) + 273.15f)) / 0.0065f;
-
+	return (ms56Unit->Data.filteredData.altitude_out);
 }
