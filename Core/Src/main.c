@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -32,7 +32,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#include "stm32746g_qspi.h"
+// #include "stm32746g_qspi.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_cdc.h"
@@ -70,7 +70,7 @@ uint32_t TenthHzCycleTimestamp = 0;
 uint32_t lastLogWrittenTimestamp = 0;
 
 float versionID = 1.000;
-float buildID = 1.050;
+float buildID = 1.060;
 
 tState unitState = INIT;
 
@@ -91,151 +91,151 @@ void SystemClock_Config(void);
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+    /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+    /* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* USER CODE BEGIN Init */
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+    /* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+    /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_I2C1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_USART1_UART_Init();
-  MX_ADC1_Init();
-  MX_DAC_Init();
-  MX_USB_DEVICE_Init();
-  MX_QUADSPI_Init();
-  MX_I2C4_Init();
-  MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_FATFS_Init();
-  /* USER CODE BEGIN 2 */
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_I2C1_Init();
+    MX_TIM1_Init();
+    MX_TIM2_Init();
+    MX_USART1_UART_Init();
+    MX_ADC1_Init();
+    MX_DAC_Init();
+    MX_USB_DEVICE_Init();
+    MX_QUADSPI_Init();
+    MX_I2C4_Init();
+    MX_SPI1_Init();
+    MX_SPI2_Init();
+    MX_FATFS_Init();
+    MX_USART2_UART_Init();
+    /* USER CODE BEGIN 2 */
 
-//  initMS56XXOutputStruct(&ms5607Baro);
-//  initSDCArd();
+    //  initMS56XXOutputStruct(&ms5607Baro);
+    //  initSDCArd();
 
-  led_init();
-  initLEDSequences();
-  setLEDSequence(&initLEDSequence);
+    led_init();
+    initLEDSequences();
+    setLEDSequence(&initLEDSequence);
 
-  USBD_Interface_fops_FS.Init();
-  HAL_Delay(2000);
+    USBD_Interface_fops_FS.Init();
+    HAL_Delay(2000);
 
-  BSP_QSPI_Init();
-  fileSystemInit();
-  createNewLogFile();
+    BSP_QSPI_Init();
+    fileSystemInit();
+    createNewLogFile();
 
+    boardPowerSources.isChargingEnabled = false;
 
-  boardPowerSources.isChargingEnabled = false;
+    readADCValues();
 
-  readADCValues();
+    checkPowerSourcesConnection();
+    initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
+    MS56XXInit(&onBoardUnit);
 
-  checkPowerSourcesConnection();
-  initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
-  MS56XXInit(&onBoardUnit);
+    initMS56XXUnit(&smallBoardUnit, GPIOE, GPIO_PIN_5, hspi2);
+    MS56XXInit(&smallBoardUnit);
 
-  initMS56XXUnit(&smallBoardUnit, GPIOE, GPIO_PIN_5, hspi2);
-  MS56XXInit(&smallBoardUnit);
+    baroInitSampleTime = HAL_GetTick();
 
-  baroInitSampleTime = HAL_GetTick();
+    bno = bnoUnitInit(bno);
+    unitState = IDLE;
+    setLEDSequence(&idleManualLEDSequence);
+    /* USER CODE END 2 */
 
-  bno = bnoUnitInit(bno);
-  unitState = IDLE;
-  setLEDSequence(&idleManualLEDSequence);
-  /* USER CODE END 2 */
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+        readBNODAta(&bno, &smallBoardBNOData, 66); // BNO
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	   readBNODAta(&bno, &smallBoardBNOData, 66); //BNO
+        MS56XXCyclicRead(&onBoardUnit); // MS5607
+        //	   GetAltitudeAndTemp(&onBoardUnit);
 
-	   MS56XXCyclicRead(&onBoardUnit); //MS5607
-//	   GetAltitudeAndTemp(&onBoardUnit);
+        MS56XXCyclicRead(&smallBoardUnit); // MS5607
+        //	   GetAltitudeAndTemp(&smallBoardUnit);
+        if (HAL_GetTick() - lastLogWrittenTimestamp >= 20)
+        {
+            lastLogWrittenTimestamp = HAL_GetTick();
+            if (((onBoardUnit.Data.isNewBaroDataAvailable) || (smallBoardUnit.Data.isNewBaroDataAvailable)) && (isRecordingActivated))
+            {
+                sprintf(resolvePointerToLogsBuffer(), "%s %s, "
+                                                      "%-6.3f, %-6.3f, "
+                                                      "%-6.3f, %-6.3f, "
+                                                      "%-6.3f, %-6.3f, %-6.3f\r\n",
+                        CT(), (char *)"",
+                        onBoardUnit.Data.rawData.altitude_out, onBoardUnit.Data.rawData.air_pressure_out,
+                        smallBoardUnit.Data.rawData.altitude_out, smallBoardUnit.Data.rawData.air_pressure_out,
+                        smallBoardBNOData.acc.x, smallBoardBNOData.acc.y, smallBoardBNOData.acc.z);
+                logData(false, false, NOCOLOR);
+            }
+        }
+        /* USER CODE END WHILE */
 
-	   MS56XXCyclicRead(&smallBoardUnit); //MS5607
-//	   GetAltitudeAndTemp(&smallBoardUnit);
-	   if (HAL_GetTick() - lastLogWrittenTimestamp >= 20)
-	   {
-		   lastLogWrittenTimestamp = HAL_GetTick();
-		   if ( ( (onBoardUnit.Data.isNewBaroDataAvailable) || (smallBoardUnit.Data.isNewBaroDataAvailable) ) && (isRecordingActivated) )
-		   {
-			   sprintf(resolvePointerToLogsBuffer(),"%s %s, "
-					   "%-6.3f, %-6.3f, "
-					   "%-6.3f, %-6.3f, "
-					   "%-6.3f, %-6.3f, %-6.3f\r\n",
-					   CT(), (char *)"",
-					   onBoardUnit.Data.rawData.altitude_out, onBoardUnit.Data.rawData.air_pressure_out,
-					   smallBoardUnit.Data.rawData.altitude_out, smallBoardUnit.Data.rawData.air_pressure_out,
-					   smallBoardBNOData.acc.x, smallBoardBNOData.acc.y, smallBoardBNOData.acc.z);
-			   logData( false, false, NOCOLOR);
-		   }
-	   }
-    /* USER CODE END WHILE */
+        /* USER CODE BEGIN 3 */
 
-    /* USER CODE BEGIN 3 */
+        checkButtonPress();
 
-	   checkButtonPress();
+        setLEDSequence(&dummyLEDSequence);
+        updateLEDSequence();
 
-	   setLEDSequence(&dummyLEDSequence);
-	   updateLEDSequence();
+        if (HAL_GetTick() - OneHzCycleTimestamp >= 1000)
+        {
+            OneHzCycleTimestamp = HAL_GetTick();
+            readADCValues();
+            checkPowerSourcesConnection();
+            chargeProcess();
+        }
 
-	  if (HAL_GetTick() - OneHzCycleTimestamp >= 1000)
-	  {
-		  OneHzCycleTimestamp = HAL_GetTick();
-		  readADCValues();
-		  checkPowerSourcesConnection();
-		  chargeProcess();
-	  }
+        if (HAL_GetTick() - TenthHzCycleTimestamp >= 10 * 1000)
+        {
+            //		  TenthHzCycleTimestamp = HAL_GetTick();
+            //		  f_sync(&USERFile);
+            if (unitState == IDLE)
+            {
+                if (free_kb <= 5)
+                {
+                    setLEDSequence(&storageErrorLEDSequence);
+                }
+            }
+        }
 
-	  if (HAL_GetTick() - TenthHzCycleTimestamp >= 10 * 1000)
-	  {
-//		  TenthHzCycleTimestamp = HAL_GetTick();
-//		  f_sync(&USERFile);
-		  if (unitState == IDLE)
-		  {
-			if (free_kb <= 5)
-			{
-				setLEDSequence(&storageErrorLEDSequence);
-			}
-		  }
-	  }
-
-	  if (usbDataChannel.receivedCR)
-	  {
-		  char localArray[128] = "";
-		  memcpy(&localArray[0], usbDataChannel.channelArray, usbDataChannel.numberOfChars);
-		  parse((char *)localArray);
-		  usbDataChannel.numberOfChars = 0;
-		  usbDataChannel.lastChar = 0;
-		  memset(usbDataChannel.channelArray, 0, sizeof(usbDataChannel.channelArray));
-		  usbDataChannel.receivedCR = false;
-	  }
-	  monitorLogSize();
-  }
-  /* USER CODE END 3 */
+        if (usbDataChannel.receivedCR)
+        {
+            char localArray[128] = "";
+            memcpy(&localArray[0], usbDataChannel.channelArray, usbDataChannel.numberOfChars);
+            parse((char *)localArray);
+            usbDataChannel.numberOfChars = 0;
+            usbDataChannel.lastChar = 0;
+            memset(usbDataChannel.channelArray, 0, sizeof(usbDataChannel.channelArray));
+            usbDataChannel.receivedCR = false;
+        }
+        monitorLogSize();
+    }
+    /* USER CODE END 3 */
 }
 
 /**

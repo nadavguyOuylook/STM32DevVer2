@@ -118,8 +118,6 @@ void Error_Handler(void);
 #define GPIO_Input_ChargeDetect_GPIO_Port GPIOD
 #define GPIO_Output_QC_DP_Signal1_Pin GPIO_PIN_3
 #define GPIO_Output_QC_DP_Signal1_GPIO_Port GPIOD
-#define GPIO_Output_QC_DP_Signal2_Pin GPIO_PIN_5
-#define GPIO_Output_QC_DP_Signal2_GPIO_Port GPIOD
 #define GPIO_Output_QC_DN_Signal1_Pin GPIO_PIN_7
 #define GPIO_Output_QC_DN_Signal1_GPIO_Port GPIOD
 #define GPIO_EXTI0_BNO_Int_Pin GPIO_PIN_0

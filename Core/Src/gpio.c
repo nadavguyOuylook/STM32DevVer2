@@ -67,7 +67,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, GPIO_Output_ms5607_CS_Pin|GPIO_Output_Hold_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DP_Signal2_Pin|GPIO_Output_QC_DN_Signal1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DN_Signal1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_Output__3_GPIO_Port, GPIO_Output__3_Pin, GPIO_PIN_RESET);
@@ -106,8 +106,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA1 PA3 PA8 PA10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_3|GPIO_PIN_8|GPIO_PIN_10;
+  /*Configure GPIO pins : PA1 PA8 PA10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_8|GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -142,10 +142,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PDPin PDPin PDPin PDPin
-                           PDPin */
-  GPIO_InitStruct.Pin = GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_ChargeEN__Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DP_Signal2_Pin
-                          |GPIO_Output_QC_DN_Signal1_Pin;
+  /*Configure GPIO pins : PDPin PDPin PDPin PDPin */
+  GPIO_InitStruct.Pin = GPIO_Output_QC_DN_Signal2_Pin|GPIO_Output_ChargeEN__Pin|GPIO_Output_QC_DP_Signal1_Pin|GPIO_Output_QC_DN_Signal1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
