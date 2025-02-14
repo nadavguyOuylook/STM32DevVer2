@@ -122,7 +122,6 @@ void Error_Handler(void);
 #define GPIO_Output_QC_DN_Signal1_GPIO_Port GPIOD
 #define GPIO_EXTI0_BNO_Int_Pin GPIO_PIN_0
 #define GPIO_EXTI0_BNO_Int_GPIO_Port GPIOE
-#define GPIO_EXTI0_BNO_Int_EXTI_IRQn EXTI0_IRQn
 #define GPIO_Input_BNO055_BI_Ind_Pin GPIO_PIN_1
 #define GPIO_Input_BNO055_BI_Ind_GPIO_Port GPIOE
 
@@ -146,6 +145,7 @@ extern uint8_t baroReadingArray[100];
 extern float versionID;
 extern float buildID;
 
+extern void SystemClock_Config(void);
 
 /* USER CODE END Private defines */
 

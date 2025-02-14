@@ -91,48 +91,49 @@ void SystemClock_Config(void);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-    /* USER CODE BEGIN 1 */
 
-    /* USER CODE END 1 */
+  /* USER CODE BEGIN 1 */
 
-    /* MCU Configuration--------------------------------------------------------*/
+  /* USER CODE END 1 */
 
-    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-    HAL_Init();
+  /* MCU Configuration--------------------------------------------------------*/
 
-    /* USER CODE BEGIN Init */
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-    /* USER CODE END Init */
+  /* USER CODE BEGIN Init */
 
-    /* Configure the system clock */
-    SystemClock_Config();
+  /* USER CODE END Init */
 
-    /* USER CODE BEGIN SysInit */
+  /* Configure the system clock */
+  SystemClock_Config();
 
-    /* USER CODE END SysInit */
+  /* USER CODE BEGIN SysInit */
 
-    /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_DMA_Init();
-    MX_I2C1_Init();
-    MX_TIM1_Init();
-    MX_TIM2_Init();
-    MX_USART1_UART_Init();
-    MX_ADC1_Init();
-    MX_DAC_Init();
-    MX_USB_DEVICE_Init();
-    MX_QUADSPI_Init();
-    MX_I2C4_Init();
-    MX_SPI1_Init();
-    MX_SPI2_Init();
-    MX_FATFS_Init();
-    MX_USART2_UART_Init();
-    /* USER CODE BEGIN 2 */
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_I2C1_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_USART1_UART_Init();
+  MX_ADC1_Init();
+  MX_DAC_Init();
+  MX_USB_DEVICE_Init();
+  MX_QUADSPI_Init();
+  MX_I2C4_Init();
+  MX_SPI1_Init();
+  MX_SPI2_Init();
+  MX_FATFS_Init();
+  MX_USART2_UART_Init();
+  /* USER CODE BEGIN 2 */
 
     //  initMS56XXOutputStruct(&ms5607Baro);
     //  initSDCArd();
@@ -156,46 +157,73 @@ int main(void)
     initMS56XXUnit(&onBoardUnit, GPIOB, GPIO_PIN_0, hspi1);
     MS56XXInit(&onBoardUnit);
 
-    initMS56XXUnit(&smallBoardUnit, GPIOE, GPIO_PIN_5, hspi2);
-    MS56XXInit(&smallBoardUnit);
+//    initMS56XXUnit(&smallBoardUnit, GPIOE, GPIO_PIN_5, hspi2);
+//    MS56XXInit(&smallBoardUnit);
 
     baroInitSampleTime = HAL_GetTick();
 
-    bno = bnoUnitInit(bno);
+//    bno = bnoUnitInit(bno);
     unitState = IDLE;
     setLEDSequence(&idleManualLEDSequence);
-    /* USER CODE END 2 */
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
+//    HAL_Delay(3000);
+//    // Disable the debug interface (optional but recommended for low-power)
+//    DBGMCU->CR &= ~DBGMCU_CR_DBG_SLEEP;  // Disable debug during Sleep mode
+//    DBGMCU->CR &= ~DBGMCU_CR_DBG_STOP;   // Disable debug during Stop mode
+//    DBGMCU->CR &= ~DBGMCU_CR_DBG_STANDBY; // Disable debug during Standby mode
+//
+//    // Clear the wake-up flag if set
+//    PWR->CR1 |= PWR_CR2_CWUPF1;  // Clear the Wake-up Flag
+//
+//    PWR->CR1 |= PWR_CR1_CSBF;
+//
+//    // Set the Standby mode
+//    PWR->CR1 |= PWR_CSR1_SBF;    // Set Standby mode (standby mode will be entered automatically after the next WFI/WFE instruction)
+//
+//    // Enter the Standby mode
+//    /* Clear the WU FLAG */
+//      __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+//
+//       /* clear the RTC Wake UP (WU) flag */
+////      __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+//
+//      HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+//    __DSB();
+//    __WFI();  // Wait For Interrupt - This instruction will cause the MCU to enter Standby mode
+//    __ISB();
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
     while (1)
     {
-        readBNODAta(&bno, &smallBoardBNOData, 66); // BNO
+//        readBNODAta(&bno, &smallBoardBNOData, 66); // BNO
 
         MS56XXCyclicRead(&onBoardUnit); // MS5607
         //	   GetAltitudeAndTemp(&onBoardUnit);
 
-        MS56XXCyclicRead(&smallBoardUnit); // MS5607
+//        MS56XXCyclicRead(&smallBoardUnit); // MS5607
         //	   GetAltitudeAndTemp(&smallBoardUnit);
-        if (HAL_GetTick() - lastLogWrittenTimestamp >= 20)
-        {
-            lastLogWrittenTimestamp = HAL_GetTick();
-            if (((onBoardUnit.Data.isNewBaroDataAvailable) || (smallBoardUnit.Data.isNewBaroDataAvailable)) && (isRecordingActivated))
-            {
-                sprintf(resolvePointerToLogsBuffer(), "%s %s, "
-                                                      "%-6.3f, %-6.3f, "
-                                                      "%-6.3f, %-6.3f, "
-                                                      "%-6.3f, %-6.3f, %-6.3f\r\n",
-                        CT(), (char *)"",
-                        onBoardUnit.Data.rawData.altitude_out, onBoardUnit.Data.rawData.air_pressure_out,
-                        smallBoardUnit.Data.rawData.altitude_out, smallBoardUnit.Data.rawData.air_pressure_out,
-                        smallBoardBNOData.acc.x, smallBoardBNOData.acc.y, smallBoardBNOData.acc.z);
-                logData(false, false, NOCOLOR);
-            }
-        }
-        /* USER CODE END WHILE */
+//        if (HAL_GetTick() - lastLogWrittenTimestamp >= 20)
+//        {
+//            lastLogWrittenTimestamp = HAL_GetTick();
+//            if (((onBoardUnit.Data.isNewBaroDataAvailable) || (smallBoardUnit.Data.isNewBaroDataAvailable)) && (isRecordingActivated))
+//            {
+//                sprintf(resolvePointerToLogsBuffer(), "%s %s, "
+//                                                      "%-6.3f, %-6.3f, "
+//                                                      "%-6.3f, %-6.3f, "
+//                                                      "%-6.3f, %-6.3f, %-6.3f\r\n",
+//                        CT(), (char *)"",
+//                        onBoardUnit.Data.rawData.altitude_out, onBoardUnit.Data.rawData.air_pressure_out,
+//                        smallBoardUnit.Data.rawData.altitude_out, smallBoardUnit.Data.rawData.air_pressure_out,
+//                        smallBoardBNOData.acc.x, smallBoardBNOData.acc.y, smallBoardBNOData.acc.z);
+//                logData(false, false, NOCOLOR);
+//            }
+//        }
+    /* USER CODE END WHILE */
 
-        /* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 
         checkButtonPress();
 
@@ -235,7 +263,7 @@ int main(void)
         }
         monitorLogSize();
     }
-    /* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
